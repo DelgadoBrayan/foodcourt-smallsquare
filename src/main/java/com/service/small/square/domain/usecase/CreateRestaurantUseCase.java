@@ -67,7 +67,6 @@ private void validateOwner(Long ownerId, String token) {
         throw new InvalidRestaurantException("El ID del propietario no puede ser nulo");
     }
 
-    
     OwnerResponseDto ownerResponse = webClient.get()
     .uri("/{idOwner}", ownerId)
     .headers(headers -> headers.setBearerAuth(token))

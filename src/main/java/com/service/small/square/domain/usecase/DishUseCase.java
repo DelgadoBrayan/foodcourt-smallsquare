@@ -40,6 +40,39 @@ public class DishUseCase implements IDishServicePort {
         dishPersistencePort.saveDish(dish);
     }
 
+    @Override
+    public Dish findDishById(Long id) {
+        return dishPersistencePort.findDishById(id);
+    }
+
+
+    @Override
+    public void updateDish(Long id, Double price, String description) {
+        Dish dish = dishPersistencePort.findDishById(id);
+        if (dish == null) {
+            throw new InvalidDishException("Plato no encontrado");
+        }
+        dish.getDishInfo().setPrice(price);
+        dish.getDishInfo().setDescription(description);
+        dishPersistencePort.saveDish(dish);
+    }
+
+    @Override
+    public void toggleDishAvailability(Long id, boolean isAvailable, String token) {
+        Dish dish = dishPersistencePort.findDishById(id);
+
+        if (dish == null) {
+            throw new InvalidDishException("Plato no encontrado");
+        }
+        
+        Restaurant restaurant = restaurantPersistencePort.findRestaurantById(dish.getRestaurantId());
+
+        validateOwner(restaurant.getOwnerId(), token);
+        
+        dish.setActive(isAvailable);
+        dishPersistencePort.saveDish(dish);
+    }
+
     private void validateOwner(Long ownerId, String token) {
     if (ownerId == null) {
         throw new InvalidRestaurantException("El ID del propietario no puede ser nulo");
