@@ -27,6 +27,11 @@ public class CreateRestaurantUseCase implements IRestaurantServicePort{
         return restaurantPersistencePort.saveRestaurant(restaurant);
     }
 
+    @Override
+    public Restaurant findRestaurantById(Long restaurantId) {
+        return restaurantPersistencePort.findRestaurantById(restaurantId);
+    }
+
     private void validateRestaurant(Restaurant restaurant) {
         if (restaurant.getName() == null || restaurant.getName().isEmpty()) {
             throw new InvalidRestaurantException("El nombre del restaurante no debe estar vacío o nulo");
