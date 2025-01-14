@@ -24,4 +24,10 @@ public class CreateRestaurantHandler {
         return restaurantMapper.toDto(savedRestaurant);
     }
 
+    public RestaurantRequestDto findRestaurantById(Long restaurantId) {
+        Restaurant restaurant = createRestaurantUseCase.findRestaurantById(restaurantId);
+        return restaurantMapper.toDto(restaurant);
+    }
+
+
 }

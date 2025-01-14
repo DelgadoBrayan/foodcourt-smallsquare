@@ -6,5 +6,6 @@ import com.service.small.square.domain.model.Restaurant;
 
 public interface IRestaurantServicePort {
     Restaurant saveRestaurant(Restaurant restaurant, String token);
+    Restaurant findRestaurantById(Long restaurantId);
 
 }

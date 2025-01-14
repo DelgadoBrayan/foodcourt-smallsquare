@@ -20,4 +20,10 @@ public class RestaurantRepositoryAdapter implements IRestaurantPersistencePort {
         return mapper.toDomain(repository.save(restaurantEntity));
     }
 
+    @Override
+    public Restaurant findRestaurantById(Long restaurantId) {
+        RestaurantEntity restaurantEntity = repository.findById(restaurantId).orElse(null);
+        return restaurantEntity != null ? mapper.toDomain(restaurantEntity) : null;
+    }
+
 }
