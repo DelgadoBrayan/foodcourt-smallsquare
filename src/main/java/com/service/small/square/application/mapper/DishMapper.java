@@ -1,5 +1,7 @@
 package com.service.small.square.application.mapper;
 
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -32,5 +34,7 @@ public interface DishMapper {
 
     @Mapping(target = "active", source = "isAvailable")
     Dish updateDishAvailability(@MappingTarget Dish dish, UpdateDishActive updateDishActive);
+
+    List<DishDto> toDishDTOList(List<Dish> dishes);
 
 }

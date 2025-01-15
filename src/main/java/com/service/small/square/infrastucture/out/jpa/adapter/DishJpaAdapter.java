@@ -1,7 +1,14 @@
 package com.service.small.square.infrastucture.out.jpa.adapter;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import com.service.small.square.domain.model.dish.Dish;
 import com.service.small.square.domain.spi.IDishPersistencePort;
+import com.service.small.square.infrastucture.out.jpa.entity.DishEntity;
 import com.service.small.square.infrastucture.out.jpa.mapper.DishEntityMapper;
 import com.service.small.square.infrastucture.out.jpa.repository.DishRepository;
 
@@ -41,5 +48,16 @@ public class DishJpaAdapter implements IDishPersistencePort {
         });
     }
 
+        @Override
+    public List<Dish> listDishesByRestaurant(Long restaurantId, int page, int size, String category) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<DishEntity> dishEntities;
+        if (category != null && !category.isEmpty()) {
+            dishEntities = dishRepository.findByRestaurantIdAndCategory(restaurantId, category, pageable);
+        } else {
+            dishEntities = dishRepository.findByRestaurantId(restaurantId, pageable);
+        }
+        return dishEntities.stream().map(dishEntityMapper::toModel).toList();
+    }
 
 }

@@ -1,5 +1,7 @@
 package com.service.small.square.application.handler;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.service.small.square.application.dto.dish.DishDto;
@@ -35,5 +37,10 @@ public class DishHandler {
         Dish dish = dishServicePort.findDishById(id);
         Dish updateDish = dishMapper.updateDishAvailability(dish, updateDishActive);
         dishServicePort.toggleDishAvailability(id, updateDish.isActive(), token);
+    }
+
+    public List<DishDto> listDishesByRestaurant(Long restaurantId, int page, int size, String category) {
+        List<Dish> dishes = dishServicePort.listDishesByRestaurant(restaurantId, page, size, category);
+        return dishMapper.toDishDTOList(dishes);
     }
 }
