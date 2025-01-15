@@ -1,5 +1,7 @@
 package com.service.small.square.domain.usecase;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -30,6 +32,15 @@ public class CreateRestaurantUseCase implements IRestaurantServicePort{
     @Override
     public Restaurant findRestaurantById(Long restaurantId) {
         return restaurantPersistencePort.findRestaurantById(restaurantId);
+    }
+
+    @Override
+    public List<Restaurant> getAllRestaurants(int page, int size) {
+        if (page < 0 || size <= 0) {
+            throw new InvalidRestaurantException("La página debe ser mayor o igual a 0 y el tamaño mayor a 0.");
+        }
+
+        return restaurantPersistencePort.getAllRestaurants(page, size);
     }
 
     private void validateRestaurant(Restaurant restaurant) {
