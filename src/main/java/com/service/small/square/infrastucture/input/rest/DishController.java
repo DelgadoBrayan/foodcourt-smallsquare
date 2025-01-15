@@ -1,13 +1,17 @@
 package com.service.small.square.infrastucture.input.rest;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.service.small.square.application.dto.dish.DishDto;
@@ -27,7 +31,8 @@ public class DishController {
     private final DishHandler dishHandler;
 
     @PostMapping
-    public ResponseEntity<Void> createDish(@Valid @RequestBody DishDto dishDto,  @RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<Void> createDish(@Valid @RequestBody DishDto dishDto,  
+                                           @RequestHeader("Authorization") String authorizationHeader) {
         String token = authorizationHeader.replace("Bearer ", "");
         dishHandler.createDish(dishDto, token);
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -40,10 +45,24 @@ public class DishController {
     }
 
     @PutMapping("/changeStatus/{id}")
-    public ResponseEntity<Void> updateDishAvailability( @RequestHeader("Authorization") String authorizationHeader, @PathVariable Long id, @RequestBody UpdateDishActive updateDishActive) {
+    public ResponseEntity<Void> updateDishAvailability( @RequestHeader("Authorization") String authorizationHeader, 
+                                                        @PathVariable Long id, 
+                                                        @RequestBody UpdateDishActive updateDishActive) {
 
         String token = authorizationHeader.replace("Bearer ", "");
         dishHandler.toggleDishAvailability(id, updateDishActive, token);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("/restaurant/{restaurantId}")
+    public ResponseEntity<List<DishDto>> listDishesByRestaurant(@PathVariable Long restaurantId, 
+                                                                @RequestParam int page,
+                                                                @RequestParam int size, 
+                                                                @RequestParam(required = false) 
+                                                                String category) {
+
+        List<DishDto> dishes = dishHandler.listDishesByRestaurant(restaurantId, page, size, category);
+        
+        return ResponseEntity.status(HttpStatus.OK).body(dishes);
     }
 }

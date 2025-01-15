@@ -1,5 +1,7 @@
 package com.service.small.square.domain.usecase;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -71,6 +73,11 @@ public class DishUseCase implements IDishServicePort {
         
         dish.setActive(isAvailable);
         dishPersistencePort.saveDish(dish);
+    }
+
+    @Override
+    public List<Dish> listDishesByRestaurant(Long restaurantId, int page, int size, String category) {
+        return dishPersistencePort.listDishesByRestaurant(restaurantId, page, size, category);
     }
 
     private void validateOwner(Long ownerId, String token) {
