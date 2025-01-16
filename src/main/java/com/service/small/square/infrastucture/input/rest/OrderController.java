@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,5 +42,11 @@ public class OrderController {
     ) {
         List<OrderDishListDto> orders = orderHandler.handleGetOrdersByStatus(status, restaurantId, page, size);
         return ResponseEntity.ok(orders);
+    }
+
+    @PatchMapping("/{orderId}/assign")
+    public ResponseEntity<Void> assignEmployeeToOrder(@PathVariable Long orderId, @RequestParam Long employeeId, @RequestParam Long restaurantId) {
+        orderHandler.assignEmployeeToOrder(orderId, employeeId, restaurantId);
+        return ResponseEntity.noContent().build();
     }
 }

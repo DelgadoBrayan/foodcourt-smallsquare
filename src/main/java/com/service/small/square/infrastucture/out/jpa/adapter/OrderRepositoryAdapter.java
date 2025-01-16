@@ -21,6 +21,7 @@ import com.service.small.square.infrastucture.out.jpa.repository.DishRepository;
 import com.service.small.square.infrastucture.out.jpa.repository.OrderDishRepository;
 import com.service.small.square.infrastucture.out.jpa.repository.OrderRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OrderRepositoryAdapter implements IOrderPersistencePort {
@@ -53,10 +54,8 @@ public class OrderRepositoryAdapter implements IOrderPersistencePort {
 
         return orderEntities.getContent().stream()
                 .map(orderEntity -> {
-                    // Obtener los platos asociados a esta orden
                     List<OrderDishEntity> orderDishEntities = orderDishRepository.findByOrderId(orderEntity.getId());
 
-                    // Mapear la información de los platos
                     List<DishDto> dishes = orderDishEntities.stream()
                             .map(orderDishEntity -> dishRepository.findById(orderDishEntity.getDishId())
                                     .map(dishEntity -> new DishDto(
@@ -73,7 +72,6 @@ public class OrderRepositoryAdapter implements IOrderPersistencePort {
                             .filter(Objects::nonNull)
                             .toList();
 
-                    // Mapear la orden y agregar la lista de platos
                     OrderDishList orderDishList = orderDishListMapper.toDomain(orderEntity);
                     orderDishList.setListDishes(dishes);
 
@@ -85,6 +83,19 @@ public class OrderRepositoryAdapter implements IOrderPersistencePort {
     public Order save(Order order) {
         OrderEntity orderEntity = orderEntityMapper.toEntity(order);
         return orderEntityMapper.toDomain(orderRepository.save(orderEntity));
+    }
+
+    @Override
+    public void assignEmployeeToOrder(Long orderId, Long employeeId) {
+        Optional<OrderEntity> entityOrderOptional = orderRepository.findById(orderId);
+        if (entityOrderOptional.isPresent()) {
+            OrderEntity entityOrder = entityOrderOptional.get();
+            entityOrder.setChefId(employeeId);
+            entityOrder.setStatus(OrderStatus.IN_PROCESS);
+            orderRepository.save(entityOrder);
+        } else {
+            throw new EntityNotFoundException("Order not found with id: " + orderId);
+        }
     }
 }
 

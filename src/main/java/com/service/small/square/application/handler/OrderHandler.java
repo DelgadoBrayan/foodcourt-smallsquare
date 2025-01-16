@@ -38,7 +38,11 @@ public class OrderHandler {
         }
         return orderServicePort.getOrdersByStatus(status, restaurantId, page, size)
             .stream()
-            .map(orderDishMapper::toDTO) // Usamos MapStruct aquí
+            .map(orderDishMapper::toDTO)
             .toList();
+    }
+
+    public void assignEmployeeToOrder(Long orderId, Long employeeId, Long restaurantId) {
+        orderServicePort.assignEmployeeToOrder(orderId, employeeId, restaurantId);
     }
 }

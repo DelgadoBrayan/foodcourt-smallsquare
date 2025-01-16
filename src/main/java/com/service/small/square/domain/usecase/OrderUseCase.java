@@ -71,4 +71,18 @@ public class OrderUseCase implements IOrderServicePort {
     public boolean existsByClientIdAndStatus(Long clientId, List<String> statuses) {
         return orderPersistencePort.existsByClientIdAndStatus(clientId, statuses);
     }
+
+    @Override
+    public void assignEmployeeToOrder(Long orderId, Long employeeId, Long restaurantId) {
+        //Pendiente hacer la validacion de que el empleado puede listar las ordenes solamente del restaurante al que pertenece
+        Order order = orderPersistencePort.findById(orderId).orElseThrow(() -> new InvalidOrderException("Order not found."));
+
+        if (!order.getRestaurantId().equals(restaurantId)) {
+            throw new InvalidOrderException("Employee does not belong to this restaurant");
+        }
+
+        order.setChefId(employeeId);
+        order.setStatus(OrderStatus.IN_PROCESS);
+        orderPersistencePort.assignEmployeeToOrder(orderId, employeeId);
+    }
 }
