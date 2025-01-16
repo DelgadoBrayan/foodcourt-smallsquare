@@ -15,4 +15,6 @@ public interface IDishPersistencePort {
 
     List<Dish> listDishesByRestaurant(Long restaurantId, int page, int size, String category);
 
+    List<Dish> findAll();
+
 }
