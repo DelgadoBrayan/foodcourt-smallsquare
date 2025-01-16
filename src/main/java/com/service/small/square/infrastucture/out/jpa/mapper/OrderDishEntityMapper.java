@@ -1,5 +1,7 @@
 package com.service.small.square.infrastucture.out.jpa.mapper;
 
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -13,4 +15,6 @@ public interface OrderDishEntityMapper {
 
     @Mapping(source = "order.id", target = "orderId")
     OrderDish toDomain(OrderDishEntity orderDishEntity);
+
+    List<OrderDish> toDomainList(List<OrderDishEntity> orderEntities);
 }

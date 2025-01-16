@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 import com.service.small.square.domain.api.IOrderServicePort;
 import com.service.small.square.domain.model.order.Order;
 import com.service.small.square.domain.model.order.OrderDish;
+import com.service.small.square.domain.model.order.OrderDishList;
 import com.service.small.square.domain.model.order.OrderStatus;
 import com.service.small.square.domain.spi.IOrderDishPersistencePort;
 import com.service.small.square.domain.spi.IOrderPersistencePort;
+import com.service.small.square.infrastucture.exception.InvalidOrderException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,11 +26,10 @@ public class OrderUseCase implements IOrderServicePort {
 
     @Override
     public Order createOrder(Order order, List<Long> listDish) {
-        if (orderPersistencePort.existsByClientIdAndStatus(order.getClientId(), List.of("PENDING", "IN_PROCESS"))) {
-            throw new IllegalArgumentException("Client already has an active order.");
+        if (orderPersistencePort.existsByClientIdAndStatus(order.getClientId(), List.of("PENDING", "IN_PROCESS", "READY"))) {
+            throw new InvalidOrderException("Cliente ya tiene una orden activa");
         }
 
-        System.out.println(order);
         order.setStatus(OrderStatus.PENDING);
         order.setDate(LocalDateTime.now());
         Order savedOrder = orderPersistencePort.save(order);
@@ -51,18 +52,19 @@ public class OrderUseCase implements IOrderServicePort {
 
     @Override
     public Order getOrderById(Long id) {
-        return orderPersistencePort.findById(id).orElseThrow(() -> new RuntimeException("Order not found."));
+        return orderPersistencePort.findById(id).orElseThrow(() -> new InvalidOrderException("Order not found."));
     }
 
     @Override
-    public List<Order> getOrdersByStatus(String status, Long restaurantId, int page, int size) {
-        if (status == null || status.isBlank()) {
-            throw new IllegalArgumentException("Status cannot be null or empty.");
-        }
+    public List<OrderDishList> getOrdersByStatus(String status, Long restaurantId, int page, int size) {
+        //Pendiente hacer la validacion de que el empleado puede listar las ordenes solamente del restaurante al que pertenece
         if (restaurantId == null) {
-            throw new IllegalArgumentException("Restaurant ID cannot be null.");
+            throw new InvalidOrderException("Restaurant ID is required and must be greater than 0.");
         }
-        return orderPersistencePort.findByStatus(status, restaurantId, page, size);
+        if (status == null || status.isBlank()) {
+            throw new InvalidOrderException("Status is required.");
+        }
+        return orderPersistencePort.findOrdersByStatusAndRestaurantId(status, restaurantId, page, size);
     }
 
     @Override
