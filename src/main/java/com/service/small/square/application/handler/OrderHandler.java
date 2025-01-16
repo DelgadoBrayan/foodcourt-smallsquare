@@ -1,9 +1,12 @@
 package com.service.small.square.application.handler;
 
 import java.util.List;
+
 import org.springframework.stereotype.Service;
 
+import com.service.small.square.application.dto.order.OrderDishListDto;
 import com.service.small.square.application.dto.order.OrderDto;
+import com.service.small.square.application.mapper.OrderDishListMapper;
 import com.service.small.square.application.mapper.OrderMapper;
 import com.service.small.square.domain.api.IOrderServicePort;
 import com.service.small.square.domain.model.order.Order;
@@ -18,6 +21,7 @@ public class OrderHandler {
 
     private final IOrderServicePort orderServicePort;
     private final OrderMapper orderMapper;
+    private final OrderDishListMapper orderDishMapper;
 
     public OrderDto createOrder(OrderDto orderDto, List<Long> orderDish) {
         Order order = orderMapper.toDomain(orderDto);
@@ -25,10 +29,16 @@ public class OrderHandler {
         return orderMapper.toDto(savedOrder);
     }
 
-    public List<OrderDto> getOrdersByStatus(String status, Long restaurantId, int page, int size) {
-        List<Order> orders = orderServicePort.getOrdersByStatus(status, restaurantId, page, size);
-        return orders.stream()
-                .map(orderMapper::toDto)
-                .toList();
+    public List<OrderDishListDto> handleGetOrdersByStatus(String status, Long restaurantId, int page, int size) {
+        if (status == null || status.isBlank()) {
+            throw new IllegalArgumentException("Status is required.");
+        }
+        if (restaurantId == null || restaurantId <= 0) {
+            throw new IllegalArgumentException("Restaurant ID must be valid.");
+        }
+        return orderServicePort.getOrdersByStatus(status, restaurantId, page, size)
+            .stream()
+            .map(orderDishMapper::toDTO) // Usamos MapStruct aquí
+            .toList();
     }
 }

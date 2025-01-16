@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.service.small.square.application.mapper.OrderDishListMapper;
 import com.service.small.square.domain.api.IDishServicePort;
 import com.service.small.square.domain.api.IOrderDishServicePort;
 import com.service.small.square.domain.api.IOrderServicePort;
@@ -42,6 +43,7 @@ public class BeanConfiguration {
     private final OrderEntityMapper orderEntityMapper;
     private final OrderDishRepository orderDishRepository;
     private final OrderDishEntityMapper orderDishEntityMapper;
+    private final OrderDishListMapper orderDishListMapper;
     private final WebClient webClient;
 
     @Bean
@@ -66,7 +68,11 @@ public class BeanConfiguration {
 
     @Bean
     IOrderPersistencePort orderPersistencePort(){
-        return new OrderRepositoryAdapter(orderRepository, orderEntityMapper);
+        return new OrderRepositoryAdapter(orderRepository, 
+                                        orderEntityMapper,
+                                        orderDishListMapper,
+                                        orderDishRepository,
+                                        dishRepository );
     }
 
     @Bean

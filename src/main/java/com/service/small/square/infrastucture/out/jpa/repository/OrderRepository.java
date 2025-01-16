@@ -3,6 +3,7 @@ package com.service.small.square.infrastucture.out.jpa.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,7 +18,5 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
 
     Optional<OrderEntity> findById(Long id);
 
-    @Query("SELECT o FROM OrderEntity o WHERE o.status = :status AND o.restaurantId = :restaurantId")
-    List<OrderEntity> findByStatusAndRestaurantId(@Param("status") OrderStatus status,
-            @Param("restaurantId") Long restaurantId, Pageable pageable);
+    Page<OrderEntity> findByStatusAndRestaurantId(OrderStatus status, Long restaurantId, Pageable pageable);
 }
