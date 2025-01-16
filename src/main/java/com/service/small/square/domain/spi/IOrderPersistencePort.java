@@ -15,4 +15,6 @@ public interface IOrderPersistencePort {
 
     boolean existsByClientIdAndStatus(Long clientId, List<String> statuses);
 
+    void assignEmployeeToOrder(Long orderId, Long employeeId);
+
 }

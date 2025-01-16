@@ -13,4 +13,6 @@ public interface IOrderServicePort {
     List<OrderDishList> getOrdersByStatus(String status, Long restaurantId, int page, int size);
 
     boolean existsByClientIdAndStatus(Long clientId, List<String> statuses);
+
+    void assignEmployeeToOrder(Long orderId, Long employeeId, Long restaurantId); 
 }
