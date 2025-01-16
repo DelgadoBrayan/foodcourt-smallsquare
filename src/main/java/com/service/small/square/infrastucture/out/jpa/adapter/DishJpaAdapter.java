@@ -60,4 +60,10 @@ public class DishJpaAdapter implements IDishPersistencePort {
         return dishEntities.stream().map(dishEntityMapper::toModel).toList();
     }
 
+        @Override
+        public List<Dish> findAll() {
+           
+            return null;
+        }
+
 }
