@@ -19,4 +19,6 @@ public interface IOrderServicePort {
     void noticationOrderReady(Long orderId, String token);
 
     void deliverOrder(Long orderId, String pin);
+
+    void cancelOrder(Long orderId);
 }

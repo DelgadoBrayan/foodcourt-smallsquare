@@ -122,5 +122,17 @@ public class OrderUseCase implements IOrderServicePort {
         order.setStatus(OrderStatus.DELIVERED);
         orderPersistencePort.save(order);
     }
+
+
+    @Override
+    public void cancelOrder(Long orderId) {
+       Order order = getOrderById(orderId);
+       if(order.getStatus() == OrderStatus.PENDING){
+        order.setStatus(OrderStatus.CANCELED);
+        orderPersistencePort.save(order);
+       }else{
+        throw new InvalidOrderException("Lo sentimos, tu pedido ya está en preparación y no puede cancelarse");
+       }
+    }
     
 }

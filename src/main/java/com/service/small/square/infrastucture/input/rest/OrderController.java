@@ -64,4 +64,10 @@ public class OrderController {
         orderHandler.deliverOrder(orderId, pin);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{orderId}/cancel")
+    public ResponseEntity<Void>cancelOrder(@PathVariable Long orderId) {
+        orderHandler.cancelOrder(orderId);
+        return ResponseEntity.noContent().build();
+    }
 }

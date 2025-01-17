@@ -20,4 +20,6 @@ public interface IOrderPersistencePort {
     void noticationOrderReady(Long orderId, String token);
 
     void deliverOrder(Long orderId);
+
+    void cancelOrder(Long orderId);
 }
