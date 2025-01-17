@@ -107,5 +107,20 @@ public class OrderUseCase implements IOrderServicePort {
             throw new InvalidOrderException("La orden no está en estado listo.");
         }
     }
+
+
+    @Override
+    public void deliverOrder(Long orderId, String pin) {
+        Order order = getOrderById(orderId);
+        if(order.getStatus() != OrderStatus.READY){
+            throw new InvalidOrderException("La orden no puede ser entregada, el estado no corresponde");
+        }
+        if(!order.getPin().equals(pin)){
+            throw new InvalidOrderException("El pin no corresponde a la orden");
+        }
+
+        order.setStatus(OrderStatus.DELIVERED);
+        orderPersistencePort.save(order);
+    }
     
 }

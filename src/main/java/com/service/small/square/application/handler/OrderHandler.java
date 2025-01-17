@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.service.small.square.application.dto.order.OrderDishListDto;
-import com.service.small.square.application.dto.order.OrderDto;
+import com.service.small.square.application.dto.order.OrderRequest;
 import com.service.small.square.application.mapper.OrderDishListMapper;
 import com.service.small.square.application.mapper.OrderMapper;
 import com.service.small.square.domain.api.IOrderServicePort;
@@ -23,10 +23,10 @@ public class OrderHandler {
     private final OrderMapper orderMapper;
     private final OrderDishListMapper orderDishMapper;
 
-    public OrderDto createOrder(OrderDto orderDto, List<Long> orderDish) {
-        Order order = orderMapper.toDomain(orderDto);
+    public OrderRequest createOrder(OrderRequest orderDto, List<Long> orderDish) {
+        Order order = orderMapper.toSave(orderDto);
         Order savedOrder = orderServicePort.createOrder(order, orderDish);
-        return orderMapper.toDto(savedOrder);
+        return orderMapper.toDtoSave(savedOrder);
     }
 
     public List<OrderDishListDto> handleGetOrdersByStatus(String status, Long restaurantId, int page, int size) {
@@ -48,5 +48,9 @@ public class OrderHandler {
 
     public void  orderReady (Long orderId, String token){
         orderServicePort.noticationOrderReady(orderId, token);
+    }
+
+    public void deliverOrder(Long orderId, String pin){
+        orderServicePort.deliverOrder(orderId,pin);
     }
 }

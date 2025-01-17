@@ -26,10 +26,14 @@ public class OrderEntity {
     @Column(nullable = false)
     private LocalDateTime date;
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private OrderStatus status;
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Long chefId;
     @Column(nullable = false)
     private Long restaurantId;
+    @Column(nullable = true)
+    private String pin;
+    @Column(nullable = true)
+    private LocalDateTime orderFinished;
 }
