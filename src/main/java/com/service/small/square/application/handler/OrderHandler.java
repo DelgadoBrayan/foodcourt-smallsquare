@@ -45,4 +45,8 @@ public class OrderHandler {
     public void assignEmployeeToOrder(Long orderId, Long employeeId, Long restaurantId) {
         orderServicePort.assignEmployeeToOrder(orderId, employeeId, restaurantId);
     }
+
+    public void  orderReady (Long orderId, String token){
+        orderServicePort.noticationOrderReady(orderId, token);
+    }
 }

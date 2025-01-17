@@ -52,7 +52,7 @@ public class OrderUseCase implements IOrderServicePort {
 
     @Override
     public Order getOrderById(Long id) {
-        return orderPersistencePort.findById(id).orElseThrow(() -> new InvalidOrderException("Order not found."));
+        return orderPersistencePort.findById(id).orElseThrow(() -> new InvalidOrderException("Order not found." + id));
     }
 
     @Override
@@ -75,7 +75,7 @@ public class OrderUseCase implements IOrderServicePort {
     @Override
     public void assignEmployeeToOrder(Long orderId, Long employeeId, Long restaurantId) {
         //Pendiente hacer la validacion de que el empleado puede listar las ordenes solamente del restaurante al que pertenece
-        Order order = orderPersistencePort.findById(orderId).orElseThrow(() -> new InvalidOrderException("Order not found."));
+        Order order = getOrderById(orderId);
 
         if (!order.getRestaurantId().equals(restaurantId)) {
             throw new InvalidOrderException("Employee does not belong to this restaurant");
@@ -85,4 +85,27 @@ public class OrderUseCase implements IOrderServicePort {
         order.setStatus(OrderStatus.IN_PROCESS);
         orderPersistencePort.assignEmployeeToOrder(orderId, employeeId);
     }
+    @Override
+    public void noticationOrderReady(Long orderId, String token) {
+        Order order = getOrderById(orderId);
+        updateOrderStatus(order);
+    
+
+        orderPersistencePort.noticationOrderReady(orderId, token);
+    }
+    
+    
+    private void updateOrderStatus(Order order) {
+        if (OrderStatus.IN_PROCESS != order.getStatus()) {
+            throw new InvalidOrderException("Esta orden no se puede actualizar a listo.");
+        }
+    
+        order.setStatus(OrderStatus.READY);
+        Order updatedOrder = orderPersistencePort.save(order);
+    
+        if (OrderStatus.READY != updatedOrder.getStatus()) {
+            throw new InvalidOrderException("La orden no está en estado listo.");
+        }
+    }
+    
 }

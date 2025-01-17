@@ -80,11 +80,6 @@ public class DishUseCase implements IDishServicePort {
         return dishPersistencePort.listDishesByRestaurant(restaurantId, page, size, category);
     }
 
-    @Override
-    public List<Dish> getAllDishes() {
-       return dishPersistencePort.findAll();
-    }
-
 
     private void validateOwner(Long ownerId, String token) {
     if (ownerId == null) {

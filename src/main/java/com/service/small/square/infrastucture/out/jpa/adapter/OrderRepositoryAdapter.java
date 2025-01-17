@@ -7,13 +7,18 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.service.small.square.application.dto.dish.DishDto;
+import com.service.small.square.application.dto.users.UsersResponse;
 import com.service.small.square.application.mapper.OrderDishListMapper;
+import com.service.small.square.domain.model.order.Notification;
 import com.service.small.square.domain.model.order.Order;
 import com.service.small.square.domain.model.order.OrderDishList;
 import com.service.small.square.domain.model.order.OrderStatus;
+import com.service.small.square.domain.notification.helpers.PinGenerator;
 import com.service.small.square.domain.spi.IOrderPersistencePort;
+import com.service.small.square.infrastucture.exception.InvalidOrderException;
 import com.service.small.square.infrastucture.out.jpa.entity.OrderDishEntity;
 import com.service.small.square.infrastucture.out.jpa.entity.OrderEntity;
 import com.service.small.square.infrastucture.out.jpa.mapper.OrderEntityMapper;
@@ -23,6 +28,7 @@ import com.service.small.square.infrastucture.out.jpa.repository.OrderRepository
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class OrderRepositoryAdapter implements IOrderPersistencePort {
 
@@ -31,6 +37,9 @@ public class OrderRepositoryAdapter implements IOrderPersistencePort {
     private final OrderDishListMapper orderDishListMapper;
     private final OrderDishRepository orderDishRepository;
     private final DishRepository dishRepository;
+    private final WebClient userWebClient;
+    private final WebClient orderWebClient;
+
 
     @Override
     public boolean existsByClientIdAndStatus(Long clientId, List<String> statuses) {
@@ -97,5 +106,42 @@ public class OrderRepositoryAdapter implements IOrderPersistencePort {
             throw new EntityNotFoundException("Order not found with id: " + orderId);
         }
     }
+
+@Override
+public void noticationOrderReady(Long orderId, String token) {
+    Optional<OrderEntity> orderEntityOptional = orderRepository.findById(orderId);
+    if (orderEntityOptional.isEmpty()) {
+        throw new EntityNotFoundException("Order not found with id: " + orderId);
+    }
+    
+    OrderEntity orderEntity = orderEntityOptional.get();
+    if (!OrderStatus.READY.equals(orderEntity.getStatus())) {
+        throw new InvalidOrderException("Order cannot be marked as ready as it is not in process.");
+    }
+    
+    orderEntity.setStatus(OrderStatus.READY);
+    orderRepository.save(orderEntity);
+
+    UsersResponse userResponse = userWebClient.get()
+        .uri("/{userId}", orderEntity.getClientId())
+        .headers(headers -> headers.setBearerAuth(token))
+        .retrieve()
+        .bodyToMono(UsersResponse.class)
+        .block();
+    
+    if (userResponse == null || userResponse.getPhone() == null) {
+        throw new InvalidOrderException("Client information not found.");
+    }
+    String pin = PinGenerator.generatePin();
+    Notification notification = new Notification(orderEntity.getId(), userResponse.getPhone(), pin);
+
+    orderWebClient.post()
+        .uri("/notification")
+        .body(Mono.just(notification), Notification.class)
+        .retrieve()
+        .toBodilessEntity()
+        .block();
+}
+
 }
 

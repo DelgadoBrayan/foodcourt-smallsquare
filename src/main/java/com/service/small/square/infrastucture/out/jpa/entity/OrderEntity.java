@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import com.service.small.square.domain.model.order.OrderStatus;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -29,7 +28,7 @@ public class OrderEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus status;
-    @Column(nullable = true)
+    @Column(nullable = false)
     private Long chefId;
     @Column(nullable = false)
     private Long restaurantId;
