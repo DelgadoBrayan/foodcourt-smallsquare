@@ -119,9 +119,9 @@ public void noticationOrderReady(Long orderId, String token) {
         throw new InvalidOrderException("Order cannot be marked as ready as it is not in process.");
     }
     
+    String pin = PinGenerator.generatePin();
     orderEntity.setStatus(OrderStatus.READY);
-    orderRepository.save(orderEntity);
-
+    orderEntity.setPin(pin);
     UsersResponse userResponse = userWebClient.get()
         .uri("/{userId}", orderEntity.getClientId())
         .headers(headers -> headers.setBearerAuth(token))
@@ -132,15 +132,28 @@ public void noticationOrderReady(Long orderId, String token) {
     if (userResponse == null || userResponse.getPhone() == null) {
         throw new InvalidOrderException("Client information not found.");
     }
-    String pin = PinGenerator.generatePin();
-    Notification notification = new Notification(orderEntity.getId(), userResponse.getPhone(), pin);
+    orderRepository.save(orderEntity);
+    
+    
+    //Notification notification = new Notification(orderEntity.getId(), userResponse.getPhone(), pin);
+    // orderWebClient.post()
+    //     .uri("/notification")
+    //     .body(Mono.just(notification), Notification.class)
+    //     .retrieve()
+    //     .toBodilessEntity()
+    //     .block();
+}
 
-    orderWebClient.post()
-        .uri("/notification")
-        .body(Mono.just(notification), Notification.class)
-        .retrieve()
-        .toBodilessEntity()
-        .block();
+@Override
+public void deliverOrder(Long orderId) {
+    Optional<OrderEntity> orderEntityOptional = orderRepository.findById(orderId);
+    if (orderEntityOptional.isEmpty()) {
+        throw new EntityNotFoundException("Order not found with id: " + orderId);
+    }
+
+    OrderEntity order = orderEntityOptional.get();
+
+    order.setStatus(OrderStatus.DELIVERED);
 }
 
 }

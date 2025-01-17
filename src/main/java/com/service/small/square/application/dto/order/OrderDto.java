@@ -14,5 +14,7 @@ public class OrderDto {
     private OrderStatus status;
     private Long chefId;
     private Long restaurantId;
+    private String pin;
+    private LocalDateTime orderFinished;
     private List<Long> listDishes;
 }

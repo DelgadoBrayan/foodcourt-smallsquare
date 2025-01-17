@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.service.small.square.application.dto.order.OrderDishListDto;
-import com.service.small.square.application.dto.order.OrderDto;
+import com.service.small.square.application.dto.order.OrderRequest;
 import com.service.small.square.application.handler.OrderHandler;
 
 import jakarta.validation.Valid;
@@ -28,7 +28,7 @@ public class OrderController {
     private final OrderHandler orderHandler;
 
     @PostMapping
-    public ResponseEntity<Void> createOrder(@Valid @RequestBody OrderDto orderDto) {
+    public ResponseEntity<Void> createOrder(@Valid @RequestBody OrderRequest orderDto) {
         List<Long> listDishes = orderDto.getListDishes();
         orderHandler.createOrder(orderDto,listDishes);
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -57,5 +57,11 @@ public class OrderController {
             @RequestHeader("Authorization") String token) {
         orderHandler.orderReady(orderId, token.replace("Bearer ", ""));
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{orderId}/deliver")
+    public ResponseEntity<Void>deliverOrder(@PathVariable Long orderId, @RequestParam String pin) {
+        orderHandler.deliverOrder(orderId, pin);
+        return ResponseEntity.noContent().build();
     }
 }
