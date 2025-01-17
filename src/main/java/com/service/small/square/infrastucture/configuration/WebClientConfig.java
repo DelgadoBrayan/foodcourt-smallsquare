@@ -11,4 +11,15 @@ public class WebClientConfig {
     public WebClient webClient() {
         return WebClient.builder().baseUrl("http://localhost:8081/api/owner").build();
     }
+
+    @Bean
+    WebClient userWebClient(){
+        return WebClient.builder().baseUrl("http://localhost:8081/owner/users").build();
+
+    }
+
+    @Bean
+    WebClient orderWebClient(){
+        return WebClient.builder().baseUrl("http://localhost:8088/api/orders").build();
+    }
 }

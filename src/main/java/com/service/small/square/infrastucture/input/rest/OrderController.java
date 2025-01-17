@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,5 +49,13 @@ public class OrderController {
     public ResponseEntity<Void> assignEmployeeToOrder(@PathVariable Long orderId, @RequestParam Long employeeId, @RequestParam Long restaurantId) {
         orderHandler.assignEmployeeToOrder(orderId, employeeId, restaurantId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{orderId}/ready")
+    public ResponseEntity<Void> notifyOrderReady(
+            @PathVariable Long orderId,
+            @RequestHeader("Authorization") String token) {
+        orderHandler.orderReady(orderId, token.replace("Bearer ", ""));
+        return ResponseEntity.ok().build();
     }
 }

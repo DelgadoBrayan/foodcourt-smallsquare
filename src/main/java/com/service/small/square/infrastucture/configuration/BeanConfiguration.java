@@ -45,6 +45,8 @@ public class BeanConfiguration {
     private final OrderDishEntityMapper orderDishEntityMapper;
     private final OrderDishListMapper orderDishListMapper;
     private final WebClient webClient;
+    private final WebClient userWebClient;
+    private final WebClient orderWebClient;
 
     @Bean
     IRestaurantPersistencePort restaurantPersistencePort() {
@@ -72,7 +74,9 @@ public class BeanConfiguration {
                                         orderEntityMapper,
                                         orderDishListMapper,
                                         orderDishRepository,
-                                        dishRepository );
+                                        dishRepository ,
+                                        userWebClient,
+                                        orderWebClient);
     }
 
     @Bean
