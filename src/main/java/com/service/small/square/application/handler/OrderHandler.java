@@ -53,4 +53,8 @@ public class OrderHandler {
     public void deliverOrder(Long orderId, String pin){
         orderServicePort.deliverOrder(orderId,pin);
     }
+
+    public void cancelOrder(Long orderId){
+        orderServicePort.cancelOrder(orderId);
+    }
 }

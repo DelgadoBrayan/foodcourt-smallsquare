@@ -12,7 +12,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.service.small.square.application.dto.dish.DishDto;
 import com.service.small.square.application.dto.users.UsersResponse;
 import com.service.small.square.application.mapper.OrderDishListMapper;
-import com.service.small.square.domain.model.order.Notification;
 import com.service.small.square.domain.model.order.Order;
 import com.service.small.square.domain.model.order.OrderDishList;
 import com.service.small.square.domain.model.order.OrderStatus;
@@ -28,9 +27,10 @@ import com.service.small.square.infrastucture.out.jpa.repository.OrderRepository
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class OrderRepositoryAdapter implements IOrderPersistencePort {
+
+    private static final String ORDER_NOT_FOUND = "Order not found with id: ";
 
     private final OrderRepository orderRepository;
     private final OrderEntityMapper orderEntityMapper;
@@ -38,7 +38,6 @@ public class OrderRepositoryAdapter implements IOrderPersistencePort {
     private final OrderDishRepository orderDishRepository;
     private final DishRepository dishRepository;
     private final WebClient userWebClient;
-    private final WebClient orderWebClient;
 
 
     @Override
@@ -101,9 +100,9 @@ public class OrderRepositoryAdapter implements IOrderPersistencePort {
             OrderEntity entityOrder = entityOrderOptional.get();
             entityOrder.setChefId(employeeId);
             entityOrder.setStatus(OrderStatus.IN_PROCESS);
-            orderRepository.save(entityOrder);
+            throw new EntityNotFoundException(ORDER_NOT_FOUND + orderId);
         } else {
-            throw new EntityNotFoundException("Order not found with id: " + orderId);
+            throw new EntityNotFoundException(ORDER_NOT_FOUND + orderId);
         }
     }
 
@@ -111,7 +110,7 @@ public class OrderRepositoryAdapter implements IOrderPersistencePort {
 public void noticationOrderReady(Long orderId, String token) {
     Optional<OrderEntity> orderEntityOptional = orderRepository.findById(orderId);
     if (orderEntityOptional.isEmpty()) {
-        throw new EntityNotFoundException("Order not found with id: " + orderId);
+        throw new EntityNotFoundException(ORDER_NOT_FOUND + orderId);
     }
     
     OrderEntity orderEntity = orderEntityOptional.get();
@@ -148,12 +147,22 @@ public void noticationOrderReady(Long orderId, String token) {
 public void deliverOrder(Long orderId) {
     Optional<OrderEntity> orderEntityOptional = orderRepository.findById(orderId);
     if (orderEntityOptional.isEmpty()) {
-        throw new EntityNotFoundException("Order not found with id: " + orderId);
+        throw new EntityNotFoundException(ORDER_NOT_FOUND + orderId);
     }
 
     OrderEntity order = orderEntityOptional.get();
 
     order.setStatus(OrderStatus.DELIVERED);
+}
+
+@Override
+public void cancelOrder(Long orderId) {
+    Optional<OrderEntity> orderEntityOptional = orderRepository.findById(orderId);
+    if (orderEntityOptional.isEmpty()) {
+        throw new EntityNotFoundException(ORDER_NOT_FOUND + orderId);
+    }
+    OrderEntity order = orderEntityOptional.get();
+    order.setStatus(OrderStatus.CANCELED);
 }
 
 }
