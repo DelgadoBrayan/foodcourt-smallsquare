@@ -42,16 +42,16 @@ public class OrderHandler {
             .toList();
     }
 
-    public void assignEmployeeToOrder(Long orderId, Long employeeId, Long restaurantId) {
-        orderServicePort.assignEmployeeToOrder(orderId, employeeId, restaurantId);
+    public void assignEmployeeToOrder(Long orderId, Long employeeId, Long restaurantId, String token) {
+        orderServicePort.assignEmployeeToOrder(orderId, employeeId, restaurantId, token);
     }
 
     public void  orderReady (Long orderId, String token){
         orderServicePort.noticationOrderReady(orderId, token);
     }
 
-    public void deliverOrder(Long orderId, String pin){
-        orderServicePort.deliverOrder(orderId,pin);
+    public void deliverOrder(Long orderId, String pin, String token){
+        orderServicePort.deliverOrder(orderId,pin,token);
     }
 
     public void cancelOrder(Long orderId){

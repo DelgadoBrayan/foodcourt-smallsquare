@@ -46,6 +46,7 @@ public class BeanConfiguration {
     private final OrderDishListMapper orderDishListMapper;
     private final WebClient webClient;
     private final WebClient userWebClient;
+    private final WebClient employeRestaurantWebClient;
 
     @Bean
     IRestaurantPersistencePort restaurantPersistencePort() {
@@ -79,7 +80,7 @@ public class BeanConfiguration {
 
     @Bean
     IOrderServicePort orderServicePort(){
-        return new OrderUseCase(orderPersistencePort(), orderDishPersistencePort());
+        return new OrderUseCase(orderPersistencePort(), orderDishPersistencePort(),employeRestaurantWebClient);
     }
 
     @Bean

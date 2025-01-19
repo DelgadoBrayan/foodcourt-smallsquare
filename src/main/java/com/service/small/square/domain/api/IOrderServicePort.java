@@ -14,11 +14,11 @@ public interface IOrderServicePort {
 
     boolean existsByClientIdAndStatus(Long clientId, List<String> statuses);
 
-    void assignEmployeeToOrder(Long orderId, Long employeeId, Long restaurantId); 
+    void assignEmployeeToOrder(Long orderId, Long employeeId, Long restaurantId, String token); 
 
     void noticationOrderReady(Long orderId, String token);
 
-    void deliverOrder(Long orderId, String pin);
+    void deliverOrder(Long orderId, String pin, String token);
 
     void cancelOrder(Long orderId);
 }

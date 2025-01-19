@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class OrderController {
 
     private final OrderHandler orderHandler;
+    private static final String BEARER_PREFIX = "Bearer ";
 
     @PostMapping
     public ResponseEntity<Void> createOrder(@Valid @RequestBody OrderRequest orderDto) {
@@ -46,22 +47,28 @@ public class OrderController {
     }
 
     @PatchMapping("/{orderId}/assign")
-    public ResponseEntity<Void> assignEmployeeToOrder(@PathVariable Long orderId, @RequestParam Long employeeId, @RequestParam Long restaurantId) {
-        orderHandler.assignEmployeeToOrder(orderId, employeeId, restaurantId);
+    public ResponseEntity<Void> assignEmployeeToOrder(@PathVariable Long orderId, 
+                                                      @RequestParam Long employeeId, 
+                                                      @RequestParam Long restaurantId, 
+                                                      @RequestHeader("Authorization") String token) {
+        
+        orderHandler.assignEmployeeToOrder(orderId, employeeId, restaurantId, token.replace(BEARER_PREFIX, ""));
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{orderId}/ready")
-    public ResponseEntity<Void> notifyOrderReady(
-            @PathVariable Long orderId,
-            @RequestHeader("Authorization") String token) {
-        orderHandler.orderReady(orderId, token.replace("Bearer ", ""));
+    public ResponseEntity<Void> notifyOrderReady(@PathVariable Long orderId,
+                                                 @RequestHeader("Authorization") String token) {
+        orderHandler.orderReady(orderId, token.replace(BEARER_PREFIX, ""));
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/{orderId}/deliver")
-    public ResponseEntity<Void>deliverOrder(@PathVariable Long orderId, @RequestParam String pin) {
-        orderHandler.deliverOrder(orderId, pin);
+    public ResponseEntity<Void>deliverOrder(@PathVariable Long orderId,
+                                            @RequestParam String pin,
+                                            @RequestHeader("Authorization") String token) {
+      
+        orderHandler.deliverOrder(orderId, pin, token.replace(BEARER_PREFIX, ""));
         return ResponseEntity.noContent().build();
     }
 

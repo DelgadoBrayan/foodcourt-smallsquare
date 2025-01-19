@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -34,6 +35,16 @@ public class RestaurantController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Restaurante creado correctamente");
     }
 
+    @GetMapping("/{restaurantId}")
+    public ResponseEntity<RestaurantRequestDto> getRestaurantById(@PathVariable Long restaurantId) {
+        RestaurantRequestDto restaurantResponseList = restaurantHandler.findRestaurantById(restaurantId);
+        if (restaurantResponseList != null) {
+            return ResponseEntity.ok(restaurantResponseList);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @GetMapping
     public ResponseEntity<List<RestaurantResponseList>> getRestaurants(
             @RequestParam(defaultValue = "0") int page,
@@ -41,5 +52,4 @@ public class RestaurantController {
         List<RestaurantResponseList> restaurants = restaurantHandler.getRestaurantsOrderedAndPaginated(page, size);
         return ResponseEntity.ok(restaurants);
     }
-
 }

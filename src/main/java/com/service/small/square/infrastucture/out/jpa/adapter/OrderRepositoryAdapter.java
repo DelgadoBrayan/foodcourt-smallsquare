@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OrderRepositoryAdapter implements IOrderPersistencePort {
 
-    private static final String ORDER_NOT_FOUND = "Order not found with id: ";
+    private static final String ORDER_NOT_FOUND = "La orden no a sido encontrada ID";
 
     private final OrderRepository orderRepository;
     private final OrderEntityMapper orderEntityMapper;
@@ -100,7 +100,7 @@ public class OrderRepositoryAdapter implements IOrderPersistencePort {
             OrderEntity entityOrder = entityOrderOptional.get();
             entityOrder.setChefId(employeeId);
             entityOrder.setStatus(OrderStatus.IN_PROCESS);
-            throw new EntityNotFoundException(ORDER_NOT_FOUND + orderId);
+            orderRepository.save(entityOrder);
         } else {
             throw new EntityNotFoundException(ORDER_NOT_FOUND + orderId);
         }
@@ -115,7 +115,7 @@ public void noticationOrderReady(Long orderId, String token) {
     
     OrderEntity orderEntity = orderEntityOptional.get();
     if (!OrderStatus.READY.equals(orderEntity.getStatus())) {
-        throw new InvalidOrderException("Order cannot be marked as ready as it is not in process.");
+        throw new InvalidOrderException("El pedido no se puede marcar como listo porque no está en proceso");
     }
     
     String pin = PinGenerator.generatePin();
@@ -129,7 +129,7 @@ public void noticationOrderReady(Long orderId, String token) {
         .block();
     
     if (userResponse == null || userResponse.getPhone() == null) {
-        throw new InvalidOrderException("Client information not found.");
+        throw new InvalidOrderException("Cliente no encontrado");
     }
     orderRepository.save(orderEntity);
     

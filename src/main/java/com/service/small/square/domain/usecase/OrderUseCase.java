@@ -5,9 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.service.small.square.domain.api.IOrderServicePort;
+import com.service.small.square.domain.model.EmployeeRestaurant;
 import com.service.small.square.domain.model.order.Order;
 import com.service.small.square.domain.model.order.OrderDish;
 import com.service.small.square.domain.model.order.OrderDishList;
@@ -17,12 +20,14 @@ import com.service.small.square.domain.spi.IOrderPersistencePort;
 import com.service.small.square.infrastucture.exception.InvalidOrderException;
 
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
 public class OrderUseCase implements IOrderServicePort {
     private final IOrderPersistencePort orderPersistencePort;
     private final IOrderDishPersistencePort orderDishPersistencePort;
+    private final WebClient employeRestaurantWebClient;
 
     @Override
     public Order createOrder(Order order, List<Long> listDish) {
@@ -52,17 +57,13 @@ public class OrderUseCase implements IOrderServicePort {
 
     @Override
     public Order getOrderById(Long id) {
-        return orderPersistencePort.findById(id).orElseThrow(() -> new InvalidOrderException("Order not found." + id));
+        return orderPersistencePort.findById(id).orElseThrow(() -> new InvalidOrderException("Orden no encontrada" + id));
     }
 
     @Override
     public List<OrderDishList> getOrdersByStatus(String status, Long restaurantId, int page, int size) {
-        //Pendiente hacer la validacion de que el empleado puede listar las ordenes solamente del restaurante al que pertenece
         if (restaurantId == null) {
-            throw new InvalidOrderException("Restaurant ID is required and must be greater than 0.");
-        }
-        if (status == null || status.isBlank()) {
-            throw new InvalidOrderException("Status is required.");
+            throw new InvalidOrderException("El ID del restaurante es requerido");
         }
         return orderPersistencePort.findOrdersByStatusAndRestaurantId(status, restaurantId, page, size);
     }
@@ -73,12 +74,12 @@ public class OrderUseCase implements IOrderServicePort {
     }
 
     @Override
-    public void assignEmployeeToOrder(Long orderId, Long employeeId, Long restaurantId) {
-        //Pendiente hacer la validacion de que el empleado puede listar las ordenes solamente del restaurante al que pertenece
+    public void assignEmployeeToOrder(Long orderId, Long employeeId, Long restaurantId, String token) {
+       
         Order order = getOrderById(orderId);
-
+        validateEmployeeRestaurant(employeeId, restaurantId, token);
         if (!order.getRestaurantId().equals(restaurantId)) {
-            throw new InvalidOrderException("Employee does not belong to this restaurant");
+            throw new InvalidOrderException("El empleado no pertenece a este restaurante.");
         }
 
         order.setChefId(employeeId);
@@ -88,17 +89,19 @@ public class OrderUseCase implements IOrderServicePort {
     @Override
     public void noticationOrderReady(Long orderId, String token) {
         Order order = getOrderById(orderId);
-        updateOrderStatus(order);
+        updateOrderStatus(order, token);
     
 
         orderPersistencePort.noticationOrderReady(orderId, token);
     }
     
     
-    private void updateOrderStatus(Order order) {
+    private void updateOrderStatus(Order order, String token) {
         if (OrderStatus.IN_PROCESS != order.getStatus()) {
             throw new InvalidOrderException("Esta orden no se puede actualizar a listo.");
         }
+
+        validateEmployeeRestaurant(order.getChefId(), order.getRestaurantId(), token);
     
         order.setStatus(OrderStatus.READY);
         Order updatedOrder = orderPersistencePort.save(order);
@@ -110,8 +113,9 @@ public class OrderUseCase implements IOrderServicePort {
 
 
     @Override
-    public void deliverOrder(Long orderId, String pin) {
+    public void deliverOrder(Long orderId, String pin, String token) {
         Order order = getOrderById(orderId);
+        validateEmployeeRestaurant(order.getChefId(),order.getRestaurantId(), token);
         if(order.getStatus() != OrderStatus.READY){
             throw new InvalidOrderException("La orden no puede ser entregada, el estado no corresponde");
         }
@@ -120,6 +124,7 @@ public class OrderUseCase implements IOrderServicePort {
         }
 
         order.setStatus(OrderStatus.DELIVERED);
+        order.setOrderFinished(LocalDateTime.now());
         orderPersistencePort.save(order);
     }
 
@@ -134,5 +139,20 @@ public class OrderUseCase implements IOrderServicePort {
         throw new InvalidOrderException("Lo sentimos, tu pedido ya está en preparación y no puede cancelarse");
        }
     }
-    
+
+    public boolean validateEmployeeRestaurant(Long employeeId, Long restaurantId, String token){
+        try {
+            EmployeeRestaurant employeeRestaurant = employeRestaurantWebClient.get()
+            .uri("/{employeeId}", employeeId)
+            .headers(headers -> headers.setBearerAuth(token))
+            .retrieve()
+            .onStatus(status -> status == HttpStatus.BAD_REQUEST, clientResponse -> Mono.error(new InvalidOrderException("Error al obtener la consulta")))
+            .bodyToMono(EmployeeRestaurant.class)
+            .block();
+
+        return employeeId.equals(employeeRestaurant.getEmplooyeId()) && restaurantId.equals(employeeRestaurant.getRestaurantId());
+        } catch (InvalidOrderException e) {
+           throw new InvalidOrderException("No perteneces a este restaurante, no puedes realizar esta accion");
+        }
+    }
 }
