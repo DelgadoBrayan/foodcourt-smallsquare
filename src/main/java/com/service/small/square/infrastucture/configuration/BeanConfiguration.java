@@ -9,6 +9,8 @@ import com.service.small.square.domain.api.IDishServicePort;
 import com.service.small.square.domain.api.IOrderDishServicePort;
 import com.service.small.square.domain.api.IOrderServicePort;
 import com.service.small.square.domain.api.IRestaurantServicePort;
+import com.service.small.square.domain.service.EmployeeValidationService;
+import com.service.small.square.domain.service.TrackingService;
 import com.service.small.square.domain.spi.IDishPersistencePort;
 import com.service.small.square.domain.spi.IOrderDishPersistencePort;
 import com.service.small.square.domain.spi.IOrderPersistencePort;
@@ -46,7 +48,8 @@ public class BeanConfiguration {
     private final OrderDishListMapper orderDishListMapper;
     private final WebClient webClient;
     private final WebClient userWebClient;
-    private final WebClient employeRestaurantWebClient;
+    private final EmployeeValidationService employeeValidationService;
+    private final TrackingService trackingService;
 
     @Bean
     IRestaurantPersistencePort restaurantPersistencePort() {
@@ -79,8 +82,8 @@ public class BeanConfiguration {
     }
 
     @Bean
-    IOrderServicePort orderServicePort(){
-        return new OrderUseCase(orderPersistencePort(), orderDishPersistencePort(),employeRestaurantWebClient);
+     IOrderServicePort orderServicePort() {
+        return new OrderUseCase(orderPersistencePort(), orderDishPersistencePort(), employeeValidationService, trackingService);
     }
 
     @Bean

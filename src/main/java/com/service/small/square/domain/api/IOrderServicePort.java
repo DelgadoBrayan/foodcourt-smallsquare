@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.service.small.square.domain.model.order.Order;
 import com.service.small.square.domain.model.order.OrderDishList;
+import com.service.small.square.domain.model.order.efficiency.EmployeeEfficiency;
+import com.service.small.square.domain.model.order.efficiency.OrderEfficiency;
 
 public interface IOrderServicePort {
     Order createOrder(Order order,  List<Long> listDishes);
@@ -21,4 +23,8 @@ public interface IOrderServicePort {
     void deliverOrder(Long orderId, String pin, String token);
 
     void cancelOrder(Long orderId);
+
+    List<OrderEfficiency> calculateOrderTimes();
+    
+    List<EmployeeEfficiency> calculateAverageTimeByEmployee();
 }

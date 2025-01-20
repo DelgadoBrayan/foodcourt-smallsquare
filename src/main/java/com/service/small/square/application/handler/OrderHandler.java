@@ -6,7 +6,11 @@ import org.springframework.stereotype.Service;
 
 import com.service.small.square.application.dto.order.OrderDishListDto;
 import com.service.small.square.application.dto.order.OrderRequest;
+import com.service.small.square.application.dto.order.efficiency.EmployeeEfficiencyDto;
+import com.service.small.square.application.dto.order.efficiency.OrderEfficiencyDto;
+import com.service.small.square.application.mapper.EmployeeEfficiencyMapper;
 import com.service.small.square.application.mapper.OrderDishListMapper;
+import com.service.small.square.application.mapper.OrderEfficiencyMapper;
 import com.service.small.square.application.mapper.OrderMapper;
 import com.service.small.square.domain.api.IOrderServicePort;
 import com.service.small.square.domain.model.order.Order;
@@ -22,6 +26,8 @@ public class OrderHandler {
     private final IOrderServicePort orderServicePort;
     private final OrderMapper orderMapper;
     private final OrderDishListMapper orderDishMapper;
+    private final OrderEfficiencyMapper orderEfficiencyMapper;
+    private final EmployeeEfficiencyMapper employeeEfficiencyMapper;
 
     public OrderRequest createOrder(OrderRequest orderDto, List<Long> orderDish) {
         Order order = orderMapper.toSave(orderDto);
@@ -56,5 +62,13 @@ public class OrderHandler {
 
     public void cancelOrder(Long orderId){
         orderServicePort.cancelOrder(orderId);
+    }
+
+    public List<OrderEfficiencyDto> getOrderEfficiencies() {
+        return orderEfficiencyMapper.toDtoList(orderServicePort.calculateOrderTimes());
+    }
+
+    public List<EmployeeEfficiencyDto> getEmployeeEfficiencies() {
+        return employeeEfficiencyMapper.toDtoList(orderServicePort.calculateAverageTimeByEmployee());
     }
 }

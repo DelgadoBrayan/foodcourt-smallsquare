@@ -27,4 +27,9 @@ public class WebClientConfig {
     WebClient orderWebClient(){
         return WebClient.builder().baseUrl("http://localhost:8088/api/orders").build();
     }
+
+    @Bean
+    WebClient trackingWebClient(){
+        return WebClient.builder().baseUrl("http://localhost:8090/api/tracking").build();
+    }
 }
