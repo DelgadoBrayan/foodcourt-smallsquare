@@ -165,5 +165,10 @@ public void cancelOrder(Long orderId) {
     order.setStatus(OrderStatus.CANCELED);
 }
 
+@Override
+public List<Order> findAllOrders() {
+    return orderEntityMapper.toDomainList(orderRepository.findAll());
+}
+
 }
 
